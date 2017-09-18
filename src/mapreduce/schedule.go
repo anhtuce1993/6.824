@@ -32,5 +32,24 @@ func schedule(jobName string, mapFiles []string, nReduce int, phase jobPhase, re
 	//
 	// TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
 	//
+	var ch = make(chan int, ntasks) 
+	for task := 0; task < ntasks; task++ {
+		go func(task int) {
+			for {
+				srv := <- registerChan
+				check := call(srv, "Worker.DoTask", DoTaskArgs{Jobname: jobName, File: mapFiles[task], Phase: phase, TaskNumber: task, NumOtherPhase: n_other}, nil)
+				if check {
+					ch <- task
+					registerChan <- srv
+					return
+				}
+			}
+		}(task)
+	}
+
+	for i := 0; i < ntasks; i++ {
+		<- ch
+	}
+
 	fmt.Printf("Schedule: %v phase done\n", phase)
 }
