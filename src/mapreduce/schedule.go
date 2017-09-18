@@ -37,7 +37,7 @@ func schedule(jobName string, mapFiles []string, nReduce int, phase jobPhase, re
 		go func(task int) {
 			for {
 				srv := <- registerChan
-				check := call(srv, "Worker.DoTask", DoTaskArgs{Jobname: jobName, File: mapFiles[task], Phase: phase, TaskNumber: task, NumOtherPhase: n_other}, nil)
+				check := call(srv, "Worker.DoTask", DoTaskArgs{JobName: jobName, File: mapFiles[task], Phase: phase, TaskNumber: task, NumOtherPhase: n_other}, nil)
 				if check {
 					ch <- task
 					registerChan <- srv
